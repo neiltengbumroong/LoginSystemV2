@@ -18,7 +18,6 @@ public class Server {
   boolean write = false;
   static Validator validator;
 
-  User currentUser;
 
   Connection connection;
   Statement createStmt;
