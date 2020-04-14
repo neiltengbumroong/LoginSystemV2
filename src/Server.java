@@ -17,6 +17,7 @@ public class Server {
   HashSet<String> userIDs; // hashset containing userIDs
   boolean write = false;
   static Validator validator;
+  static Random rand;
 
 
   Connection connection;
@@ -33,7 +34,7 @@ public class Server {
     usernames = new HashSet<String>();
     userIDs = new HashSet<String>();
     validator = new Validator();
-    currentUser = null;
+    rand = new Random();
 
     // establish database connection with SQLite
     try {
@@ -61,6 +62,12 @@ public class Server {
       searchStmt = connection.prepareStatement("SELECT * FROM USERS WHERE Username=? AND Password=?");
       updateStmt = connection.prepareStatement("UPDATE USERS SET LastLogin=? WHERE Username=?");
 
+      Statement userIDstmt = connection.createStatement();
+      // select users from dataset and add to userIDs hashset
+      ResultSet userSet = userIDstmt.executeQuery("SELECT UserID FROM USERS");
+      while (userSet.next()) {
+        userIDs.add(userSet.getString("UserID"));
+      }
 
     }
     catch ( Exception e ) {
@@ -93,7 +100,12 @@ public class Server {
 			primePower = (primePower * p) % 999999;
 		}
 		int curr = Math.abs(key);
-    return Integer.toString(curr);
+    String temp = Integer.toString(curr);
+    // append arbitrary digits to userID to fill 6 characters
+    while (temp.length() < 6) {
+      temp = temp + Integer.toString((rand.nextInt(9)));
+    }
+    return temp;
   }
 
   // method to return the current time (used for logging last login)
@@ -179,6 +191,67 @@ public class Server {
       }
     }
     return false;
+  }
+
+  // csv as first, last, username, password, birthday
+  public void parseCSVFile(String fileToLoad) {
+    try {
+      BufferedReader reader = new BufferedReader(new FileReader(fileToLoad));
+      // skip first line in csv file denoting column names
+      reader.readLine();
+      String row = "";
+      // parse user data line by line and assign variables appropriately
+      while ((row = reader.readLine()) != null) {
+        String[] data = row.split(",");
+        String username = data[2];
+        String first = data[0];
+        String last = data[1];
+        String userID = computeUserID(username);
+        if (this.userIDs.contains(userID)) {
+          // compute new userID
+          userID = computeUserID(username + first);
+        }
+
+        String password = "";
+        try {
+          password = computeHash(data[3]);
+        }
+        catch (NoSuchAlgorithmException n) {
+          n.printStackTrace();
+        }
+        String birthday = "";
+        if (data.length == 5) {
+          birthday = data[4];
+        }
+        else {
+          birthday = "null";
+        }
+
+        // attempt to add user to database
+        try {
+          insertStmt.setString(1, userID);
+          insertStmt.setString(2, "user");
+          insertStmt.setString(3, first);
+          insertStmt.setString(4, last);
+          insertStmt.setString(5, username);
+          insertStmt.setString(6, password);
+          if (birthday.equals("null")) {
+            insertStmt.setString(7, null);
+          }
+          else {
+            insertStmt.setString(7, birthday);
+          }
+          insertStmt.setString(8, null);
+          insertStmt.executeUpdate();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+
   }
 
   public void createUserPath() {
