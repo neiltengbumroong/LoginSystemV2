@@ -43,7 +43,7 @@ public class Server {
       connection = DriverManager.getConnection("jdbc:sqlite:Users.db");
 
       createStmt = connection.createStatement();
-      //createStmt.executeUpdate("DROP TABLE IF EXISTS Users");
+      createStmt.executeUpdate("DROP TABLE IF EXISTS Users");
       String sql = "CREATE TABLE IF NOT EXISTS Users " +
                     "(UserID INT PRIMARY KEY NOT NULL, " +
                     "Type TEXT, " +
@@ -227,6 +227,13 @@ public class Server {
           birthday = "null";
         }
 
+        String lastLogin = "null";
+
+        if (data.length == 6) {
+          birthday = data[4];
+          lastLogin = data[5];
+        }
+
         // attempt to add user to database
         try {
           insertStmt.setString(1, userID);
@@ -241,7 +248,12 @@ public class Server {
           else {
             insertStmt.setString(7, birthday);
           }
-          insertStmt.setString(8, null);
+          if (lastLogin.equals("null")) {
+            insertStmt.setString(8, null);
+          }
+          else {
+            insertStmt.setString(8, lastLogin);
+          }
           insertStmt.executeUpdate();
         } catch (Exception e) {
           e.printStackTrace();
@@ -295,7 +307,7 @@ public class Server {
         break;
       }
       else {
-        System.out.println("Username must be between 6 and 13 characters");
+        System.out.println("Username must be between 4 and 13 characters");
       }
     }
 
@@ -312,15 +324,15 @@ public class Server {
     }
 
     // handle birthday
-    System.out.print("Please enter your birthday (mm-dd-yyyy): ");
+    System.out.print("Please enter your birthday (mm/dd/yyyy): ");
     String birthday = "";
     while (true) {
       birthday = scanner.next();
       if (validator.validateBirthday(birthday)) {
         break;
       }
-      System.out.println("Invalid birthday! Birthday must be in mm-dd-yyyy format");
-      System.out.print("Please enter your birthday (mm-dd-yyyy): ");
+      System.out.println("Invalid birthday! Birthday must be in mm/dd/yyyy format");
+      System.out.print("Please enter your birthday (mm/dd/yyyy): ");
     }
 
     // create the final user

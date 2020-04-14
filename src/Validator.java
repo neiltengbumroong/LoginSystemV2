@@ -1,9 +1,9 @@
 import java.util.regex.*;
 
 public class Validator {
-  final String USER_VALIDATOR = "(.{6,13})";
+  final String USER_VALIDATOR = "(.{4,13})";
   final String PASS_VALIDATOR = "((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,20})";
-  final String BDAY_VALIDATOR = "\\d{2}-\\d{2}-\\d{4}";
+  final String BDAY_VALIDATOR = "\\d{2}/\\d{2}/\\d{4}";
   final String NAME_VALIDATOR = "[a-zA-Z_]+";
 
   // first and last names can only contain letters
