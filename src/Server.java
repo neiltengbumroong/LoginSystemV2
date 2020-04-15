@@ -17,7 +17,6 @@ public class Server {
   HashSet<String> userIDs; // hashset containing userIDs
   boolean write = false;
   static Validator validator;
-  static Random rand;
 
 
   Connection connection;
@@ -34,7 +33,6 @@ public class Server {
     usernames = new HashSet<String>();
     userIDs = new HashSet<String>();
     validator = new Validator();
-    rand = new Random();
 
     // establish database connection with SQLite
     try {
@@ -43,7 +41,7 @@ public class Server {
       connection = DriverManager.getConnection("jdbc:sqlite:Users.db");
 
       createStmt = connection.createStatement();
-      createStmt.executeUpdate("DROP TABLE IF EXISTS Users");
+      //createStmt.executeUpdate("DROP TABLE IF EXISTS Users");
       String sql = "CREATE TABLE IF NOT EXISTS Users " +
                     "(UserID INT PRIMARY KEY NOT NULL, " +
                     "Type TEXT, " +
@@ -76,50 +74,11 @@ public class Server {
     }
   }
 
-  // compute a hash for the password when the user is created
-  public static String computeHash(String pass) throws NoSuchAlgorithmException {
-    MessageDigest md = null;
-    String hex = "";
-    md = MessageDigest.getInstance("SHA-256");
-    // Change this to UTF-16 if needed
-    md.update(pass.getBytes(StandardCharsets.UTF_8));
-    byte[] digest = md.digest();
-    hex = String.format("%064x", new BigInteger(1, digest));
-
-    return hex;
-  }
-
-  // compute a userID by using the username to generate a hash
-  public static String computeUserID(String val) {
-    int p = 1000003;
-		int primePower = 1;
-		int key = 0;
-		for (int i = 0; i < val.length(); i++) {
-			key += val.charAt(i) * primePower;
-			key %= 999999;
-			primePower = (primePower * p) % 999999;
-		}
-		int curr = Math.abs(key);
-    String temp = Integer.toString(curr);
-    // append arbitrary digits to userID to fill 6 characters
-    while (temp.length() < 6) {
-      temp = temp + Integer.toString((rand.nextInt(9)));
-    }
-    return temp;
-  }
-
-  // method to return the current time (used for logging last login)
-  public static String getTime() {
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    LocalDateTime now = LocalDateTime.now();
-    String currTime = dtf.format(now);
-    return currTime;
-  }
 
   public boolean checkValidCredentials(String user, String pass) {
     String passAttempt = "";
     try {
-      passAttempt = computeHash(pass);
+      passAttempt = Utils.computeHash(pass);
     }
     catch (NoSuchAlgorithmException n) {
       n.printStackTrace();
@@ -143,17 +102,17 @@ public class Server {
 
   public boolean createUser(String first, String last, String username, String password, String birthday, boolean isAdmin) {
     try {
-      password = computeHash(password);
+      password = Utils.computeHash(password);
     }
     catch (NoSuchAlgorithmException n) {
       n.printStackTrace();
     }
 
-    String userID = computeUserID(username);
+    String userID = Utils.computeUserID(username);
 
     // create and add user to hashmap with appropriate elements
     User newUser = new User(first, last, username, password, birthday, isAdmin, userID);
-    newUser.setLastLogin(getTime());
+    newUser.setLastLogin(Utils.getTime());
 
     // attempt to add user to database
     try {
@@ -206,15 +165,15 @@ public class Server {
         String username = data[2];
         String first = data[0];
         String last = data[1];
-        String userID = computeUserID(username);
+        String userID = Utils.computeUserID(username);
         if (this.userIDs.contains(userID)) {
           // compute new userID
-          userID = computeUserID(username + first);
+          userID = Utils.computeUserID(username + first);
         }
 
         String password = "";
         try {
-          password = computeHash(data[3]);
+          password = Utils.computeHash(data[3]);
         }
         catch (NoSuchAlgorithmException n) {
           n.printStackTrace();
@@ -352,7 +311,7 @@ public class Server {
     if (this.checkValidCredentials(username, password)) {
       System.out.println("Login successful!");
       try {
-        updateStmt.setString(1, getTime());
+        updateStmt.setString(1, Utils.getTime());
         updateStmt.setString(2, username);
         updateStmt.executeUpdate();
       } catch (Exception e) {
@@ -401,7 +360,7 @@ public class Server {
       else if (input.equals("l")) {
         this.loginPath();
       }
-      // handles user login
+      // handles user deletion
       else if (input.equals("d")) {
         //TODO
       }
