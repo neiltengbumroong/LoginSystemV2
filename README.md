@@ -3,6 +3,7 @@
 A second, improved version of LoginSystemV1 that writes to an external SQLite database using JDBC. <br> 
 Core functionality includes: <br>
 * user creation and user login
+* unique user ID 
 * password encryption
 * external storage via JDBC database
 * CSV file parsing for existing data
