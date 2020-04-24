@@ -17,4 +17,5 @@ And run with: <br>
 ```
 java -cp .:sqlite-jdbc-3.30.1.jar Program
 ```
-
+Data is stored in the following schema with example data. 
+![Sample Database](/database_functionality.jpg?raw=true "Database")
