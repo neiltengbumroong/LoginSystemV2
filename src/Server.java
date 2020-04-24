@@ -327,11 +327,9 @@ public class Server {
   public static void printUsage() {
     System.out.println("c - create account. Terminal will prompt for user information, such as creating username and password.");
     System.out.println("l - login. Terminal will prompt for user and password, and will verify matching user to password hash.");
-    System.out.println("d - delete account. Terminal will prompt for username and password to delete.");
     System.out.println("What else would you like to do?" + "\n" +
                         "c - create account" + "\n" +
                         "l - login" + "\n" +
-                        "d - delete account" + "\n" +
                         "e - exit");
   }
 
@@ -343,7 +341,6 @@ public class Server {
     System.out.println("Welcome! What would you like to do?" + "\n" +
                         "c - create account" + "\n" +
                         "l - login" + "\n" +
-                        "d - delete account" + "\n" +
                         "e - exit");
 
     Scanner scanner = new Scanner(System.in);
@@ -373,7 +370,6 @@ public class Server {
       System.out.println("What else would you like to do?" + "\n" +
                           "c - create account" + "\n" +
                           "l - login" + "\n" +
-                          "d - delete account" + "\n" +
                           "e - exit");
 
       input = scanner.next();
